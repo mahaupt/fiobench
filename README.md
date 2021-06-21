@@ -1,3 +1,5 @@
+[![Container Build And Push](https://github.com/mahaupt/fiobench/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/mahaupt/fiobench/actions/workflows/main.yml)
+
 # fiobench
 This is a fork from [leeliu/dbench](https://github.com/leeliu/dbench) optimized for multi plaform benchmarks and better readability/tracability.  
 Benchmark Kubernetes persistent disk volumes with `fio`: Read/write IOPS, bandwidth MB/s and latency.
