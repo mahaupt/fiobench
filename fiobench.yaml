@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: dbench-pv-claim
+  name: fiobench-pv-claim
 spec:
   storageClassName: ssd
   # storageClassName: gp2
@@ -18,13 +18,13 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dbench
+  name: fiobench
 spec:
   template:
     spec:
       containers:
-      - name: dbench
-        image: logdna/dbench:latest
+      - name: fiobench
+        image: cbacon93/fiobench:latest
         imagePullPolicy: Always
         env:
           - name: DBENCH_MOUNTPOINT
@@ -38,11 +38,11 @@ spec:
           # - name: FIO_DIRECT
           #   value: "0"
         volumeMounts:
-        - name: dbench-pv
+        - name: fiobench-pv
           mountPath: /data
       restartPolicy: Never
       volumes:
-      - name: dbench-pv
+      - name: fiobench-pv
         persistentVolumeClaim:
-          claimName: dbench-pv-claim
+          claimName: fiobench-pv-claim
   backoffLimit: 4
