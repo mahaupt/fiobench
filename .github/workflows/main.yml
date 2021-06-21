@@ -15,7 +15,7 @@ jobs:
       - name: Autotag
         uses: phish108/autotag-action@1.1.37
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
         
       - name: Docker setup buildx
@@ -26,9 +26,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to Github Packages
+        run: "echo $CR_PAT | docker login ghcr.io -u mahaupt --password-stdin"
+        env:
+          CR_PAT: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Build and Push
-        run: docker buildx build --platform linux/amd64,linux/386,linux/arm64 -t cbacon93/fiobench:latest --push .
+        run: docker buildx build --platform linux/amd64,linux/386 -t cbacon93/fiobench:latest -t ghcr.io/mahaupt/fiobench:latest --push .
         
           
       
