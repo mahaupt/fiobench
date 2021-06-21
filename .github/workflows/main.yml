@@ -5,6 +5,20 @@ on:
     branches: [ master ]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Lint
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: master
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
   build:
     runs-on: ubuntu-latest
     
@@ -14,21 +28,53 @@ jobs:
         
       - name: Autotag
         uses: phish108/autotag-action@1.1.37
+        id: autotag
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          platforms: all
         
       - name: Docker setup buildx
+        id: buildx
         uses: docker/setup-buildx-action@v1.3.0
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
           
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to Github Packages
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Build and Push
-        run: docker buildx build --platform linux/amd64,linux/386,linux/arm64 -t cbacon93/fiobench:latest --push .
+        uses: docker/build-push-action@v2
+        #-t ghcr.io/mahaupt/fiobench:${{ steps.autotag.outputs.new-tag }} \
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          tags: |
+            cbacon93/fiobench:latest
+            ghcr.io/mahaupt/fiobench:latest
         
           
       
