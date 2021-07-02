@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: fiobench-pv-claim
 spec:
-  storageClassName: ssd
+  # storageClassName: ssd
   # storageClassName: gp2
   # storageClassName: local-storage
   # storageClassName: ibmc-block-bronze
